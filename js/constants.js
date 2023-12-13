@@ -78,7 +78,6 @@ const RESULT = [
 ]
 
 export{
-    YELLOWVEHICLESPATHS,
     ANSWERSTEXT,
     RESULT
   
