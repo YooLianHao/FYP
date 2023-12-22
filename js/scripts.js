@@ -9,11 +9,10 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils';
 
 import { 
-    ANSWERSTEXT
+    ANSWERSTEXT,
+    RESULT
  } from './constants';
 
- import {questions} from "./question&answer.js"
- import {answers} from "./question&answer.js"
 
 const entityManager = new YUKA.EntityManager();
 
@@ -27,6 +26,7 @@ const title = document.querySelector('.header h1');
 const explanation = document.querySelector('.explanation');
 const nextQuestionButton = document.querySelector('.explanation button');
 const question = document.querySelector('.questions p');
+const result = document.querySelector('.result');
 
 const option1 = document.getElementById('option1');
 const option2 = document.getElementById('option2');
@@ -37,10 +37,10 @@ const option2Text = document.getElementById('a2-text');
 const option3Text = document.getElementById('a3-text');
 
 
-let questionNumber = 1;
+
 let cameraX = 3;
 let cameraZ = 144;
-
+let questionNumber = 1;
 //import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
 
@@ -228,13 +228,14 @@ startButton.addEventListener('mousedown', function() {
 
 
 const options = document.querySelectorAll('li');
-let chosenIndex = null; 
+let chosenIndex = 0; 
 
 function chooseAnswer() {
   
     options.forEach((option, index) => {
   
       option.addEventListener('click', () => {
+
       
         // Unhighlight previous choice
         if(chosenIndex !== null) {
@@ -248,9 +249,13 @@ function chooseAnswer() {
   
         // Update chosen index
         chosenIndex = index;
+
+        
         
         // Log index + 1 (to start from 1 instead of 0)
         console.log(chosenIndex+1); 
+
+      
 
         gsap.to(explanation, {
           autoAlpha: 1, 
@@ -265,9 +270,6 @@ function chooseAnswer() {
   }
   
   chooseAnswer();
-
-
-
 
 
 option1.addEventListener('click', chooseAnswer.bind(null,option1));
@@ -289,97 +291,63 @@ function changeOptionsText(qtion, opt1, opt2, opt3){
     option2Text.textContent = opt2;
     option3Text.textContent = opt3;
 
-}
-
-
-
-
-
-function turnLeft(){
-    cameraX -= 97; 
-}
-
-function turnRight(){
-    cameraX += 97; 
-}
-
-function goStraight(){
-    cameraZ -= 90; 
-}
-
-function reverse(){
-    cameraZ += 90; 
-}
-
-
-
-
-
-
-
-
-nextQuestionButton.addEventListener('click', function() {
-    chooseAnswer(); 
-   
-    //questionNumber++;
-    questionNumber+= chosenIndex + 1;
-   
-    switch (questionNumber) {
-        // case 1:
-        //     resetCamera();
-        // break;
-
-        case 2:
-       
-            // cameraZ = 51;
-            goStraight(); //(向前)    
-            break;
+}    
         
-        case 3:
-            // questionNumber = 1;
-            turnRight(); //（向右）
-            break;
+    // Reusable animation functions  
+    const cameraAnimations = [
+        function() {
+          // Animation 1
+          cameraZ = 51; 
+        },
+        function() {  
+          // Animation 2
+          cameraX = 100;
+        },
+        function() {
+         // Animation 3 
+         cameraZ = -45;
+        },
+        function() {
+         // Animation 4 
+         cameraX = 4;
+        },
+        function() {
+         // Animation 5 
+         cameraZ = -135;
+        },
+        function() {
+         // Animation 6 
+         cameraX = -93;
+        },
+        function() {
+         // Animation 7 
+         cameraX = 4;
+         
+        },
+        function() {
+         // Animation 8 
+         cameraZ = -45;
+        },
+        function() {
+         // Animation 9 
+         cameraZ = -215;
+        },
+        function() {
+         // Animation 10 
+         cameraZ = -215;
+        }
+      ];
 
-        case 4:
-            goStraight();; //（向前）
-            break; 
-            
-        case 5:
-            turnLeft(); //（向左）
-            break; 
-            
-        case 6:
-            goStraight(); //（向前）
-            break; 
-            
-        case 7:
-            turnLeft(); //（向左）
-            break; 
-            
-        case 8:
-            turnRight(); //（向右）
-            break; 
-        
-        case 9:
-            reverse();//（向前）
-            break; 
+    
+    
+        function playCameraAnimation(index) {
+            cameraAnimations[index](); 
+          }
 
-        case 10:
-            goStraight();//（向前）
-            nextQuestionButton.textContent = "RESULT";
-            //nextQuestionButton.disabled = true;
-            //nextQuestionButton.style.visibility = "hidden";
-            break; 
 
-        case 11:
-            goStraight();
+          function updateQuestionsAndOptions(CurrentQuestionNumber) {
 
-        default:
-            showResult();
-                    
-    }
-
-    const t1 = gsap.timeline();
+            const t1 = gsap.timeline();
     t1.to(camera.position, {
         x: cameraX,
         z: cameraZ,
@@ -409,10 +377,10 @@ nextQuestionButton.addEventListener('click', function() {
         onComplete: function() {
             changeColors();
                changeOptionsText(
-                    ANSWERSTEXT[questionNumber -1].question,
-                    ANSWERSTEXT[questionNumber -1].option1,
-                    ANSWERSTEXT[questionNumber -1].option2,
-                    ANSWERSTEXT[questionNumber -1].option3,
+                    ANSWERSTEXT[CurrentQuestionNumber-1].question,
+                    ANSWERSTEXT[CurrentQuestionNumber-1].option1,
+                    ANSWERSTEXT[CurrentQuestionNumber-1].option2,
+                    ANSWERSTEXT[CurrentQuestionNumber-1].option3,
                );
 
         }
@@ -433,193 +401,239 @@ nextQuestionButton.addEventListener('click', function() {
         rotateX: 0,
         duration: 0.2
     }, '+=0.3')
+          }
+          
+
+
+
+nextQuestionButton.addEventListener('click', function() {
+
+
+    chooseAnswer();
+    
+  switch(questionNumber) {
+    
+    case 1: 
+        playCameraAnimation(0);
+       
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+
+//     playCameraAnimation(0);
+       
+    
+//     if(chosenIndex == 0){
+//        showResult(
+
+//             RESULT[CurrentQuestionNumber-1].result,
+            
+//        );
+//         result = RESULT[0];
+//     }else if (chosenIndex == 1){
+//         result = RESULT[2];
+//     }
+
+
+//    nextQuestionButton.textContent = "RESULT";
+       
+         break;
+
+
+    case 2:
+        playCameraAnimation(1);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+  
+         break;
+
+    case 3:
+        playCameraAnimation(2);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+  
+         break;
+    
+    case 4:
+        playCameraAnimation(3);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+     
+         break;
+
+    case 5:
+        playCameraAnimation(4);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+  
+         break;
+
+    case 6:
+        playCameraAnimation(5);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+       
+         break;
+
+    case 7:
+        playCameraAnimation(6);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+       
+       
+         break;
+
+    case 8:
+        playCameraAnimation(7);
+        alert(`ChosenIndex: ${chosenIndex}`);
+        if(chosenIndex == 0){
+            questionNumber += chosenIndex+1;
+        }else if (chosenIndex == 1){
+            questionNumber += chosenIndex+1;
+        }else if(chosenIndex == 2){
+            questionNumber += chosenIndex+1;
+   }
+   alert(`questionNumebr: ${questionNumber}`);
+   nextQuestionButton.textContent = "RESULT";
+       
+       
+  
+         break;
+
+    case 9:
+        playCameraAnimation(8);
+        alert(`ChosenIndex: ${chosenIndex}`);
+//         if(chosenIndex == 0){
+//             questionNumber += chosenIndex+1;
+//         }else if (chosenIndex == 1){
+//             questionNumber += chosenIndex+1;
+//         }else if(chosenIndex == 2){
+//             questionNumber += chosenIndex+1;
+//    }
+   alert(`questionNumebr: ${questionNumber}`);
+   nextQuestionButton.textContent = "RESULT";
+   showResult();
+   
+         break;
+
+    case 10:
+        playCameraAnimation(9);
+        alert(`ChosenIndex: ${chosenIndex}`);
+//         if(chosenIndex == 0){
+//             questionNumber += chosenIndex+1;
+//         }else if (chosenIndex == 1){
+//             questionNumber += chosenIndex+1;
+//         }else if(chosenIndex == 2){
+//             questionNumber += chosenIndex+1;
+//    }
+   alert(`questionNumebr: ${questionNumber}`);
+   nextQuestionButton.textContent = "RESULT";
+   showResult();
+      
+         break;
+
+         case 11:
+            playCameraAnimation(10);
+            showResult();
+  }
+
+  updateQuestionsAndOptions(questionNumber);
 
     
 });
 
-// function resetCamera(){
+function showResult(resultNUmber) {
+    if (nextQuestionButton.textContent == 'RESULT') {
 
-// const t1 = gsap.timeline();
-//     t1.to(question, {
-//         autoAlpha: 0,
-//         duration: 1
-//     },0)
-//     .to(option1, {
-//         rotateX: 0,
-//         duration: 1
-//     },0)
-//     .to(option2, {
-//         rotateX: 0,
-//         duration: 1
-//     },0)
-//     .to(option3, {
-//         autoAlpha: 0,
-//         duration: 1
-//     },0)
-//     .to(camera.position, {
-//         x: 3,
-//         y: 10,
-//         z: 218,
-//         duration: 3
-//     },0)
-//     .to(camera.rotation, {
-//         x: 0.4,
-//         duration: 3
-//     },0)
+         // Get the corresponding result object based on questionNumber and chosenIndex
+         const resultIndex = chosenIndex; // Adjust this logic based on your requirements
+         const resultContent = RESULT[resultIndex];
 
-//     .to(title, {
-//         autoAlpha: 1,
-//         duration: 1
-//     },0)
-//     .to(startButton, {
-//         autoAlpha: 1,
-//         duration: 0.5
-//     })
-    
-// }
+        // Get screen dimensions
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
 
+        // Create or open a new full-screen window
+        const resultWindow = window.open('', '_blank', `width=${screenWidth},height=${screenHeight}`);
 
+        // Write the result content to the new window
+        resultWindow.document.write(`
+            <html>
+                <head>
+                    <title>Result</title>
+                    <!-- Include any necessary styles or scripts here -->
+                </head>
+                <body>
+                    <h1>PERSONALITY TYPES</h1>
+                    <p>${resultContent.type}</p>
+                    <p>${resultContent.explanation}</p>
+                    <button onclick="window.close(); location.reload()">Test Again</button>
+                </body>
+            </html>
+        `);
 
+        // Optionally, you can include additional styles or scripts within the result window
+        resultWindow.document.head.innerHTML += `
+            <style>
+                /* Add your custom styles here */
+            </style>
+        `;
+    }
 
-
-
-
-
-
-
-
-// function turnLeft(){
-//     cameraX -= 90; 
-// }
-
-// function turnRight(){
-//     cameraX += 90; 
-// }
-
-// function goStraight(){
-//     cameraZ -= 90; 
-// }
-
-
-
-
-
-// nextQuestionButton.addEventListener('click', function() {
-//     chooseAnswer(); 
-   
-//     questionNumber++;
-//     //questionNumber+= chosenIndex + 1;
-   
-//     switch (questionNumber) {
-//         case 2:
-//             goStraight(); //(向前)
-//             break;
-        
-//         case 3:
-//             turnRight(); //（向右）
-//             break;
-
-//         case 4:
-//             cameraZ = -45; //（向前）
-//             break; 
-            
-//         case 5:
-//             cameraX = 4; //（向左）
-//             break; 
-            
-//         case 6:
-//             cameraZ = -145; //（向前）
-//             break; 
-            
-//         case 7:
-//             cameraX = -90; //（向左）
-//             break; 
-            
-//         case 8:
-//             cameraX = 4; //（向右）
-//             break; 
-        
-//         case 9:
-//             cameraZ = -55;//（向右）
-//             break; 
-
-//         case 10:
-//             cameraZ = -195;//（向右）
-//             nextQuestionButton.textContent = "RESULT";
-//             //nextQuestionButton.disabled = true;
-//             //nextQuestionButton.style.visibility = "hidden";
-//             break; 
-
-//         default:
-//             showResult();
-                    
-//     }
-
-//     const t1 = gsap.timeline();
-//     t1.to(camera.position, {
-//         x: cameraX,
-//         z: cameraZ,
-//         duration: 4
-
-//     })
-//     .to(question, {
-//         autoAlpha: 0,
-//         duration: 0.2
-//     },0)
-//     .to(explanation, {
-//         autoAlpha: 0,
-//         y: '+=10',
-//         duration: 0.5
-//     },0)
-//     .to(option1, {
-//         rotateX: 90,
-//         duration: 0.2
-//     }, '-=3.7')
-//     .to(option2, {
-//         rotateX: 90,
-//         duration: 0.2
-//         }, '-=3.5')
-//     .to(option3, {
-//         rotateX: 90,
-//         duration: 0.2,
-//         onComplete: function() {
-//             changeColors();
-//                changeOptionsText(
-//                     ANSWERSTEXT[questionNumber -1].question,
-//                     ANSWERSTEXT[questionNumber -1].option1,
-//                     ANSWERSTEXT[questionNumber -1].option2,
-//                     ANSWERSTEXT[questionNumber -1].option3,
-//                );
-
-//         }
-//     }, '-=3.3')
-//     .to(question, {
-//         autoAlpha: 1,
-//         duration: 0.2,
-//     }, '-=0.5')
-//     .to(option1, {
-//         rotateX: 0,
-//         duration: 0.2
-//     }, '+=0.5')
-//     .to(option2, {
-//         rotateX: 0,
-//         duration: 0.2
-//     }, '+=0.4')
-//     .to(option3, {
-//         rotateX: 0,
-//         duration: 0.2
-//     }, '+=0.3')
-
-    
-// });
-
-
-
-
-   
-
-
-
+}
 
 const time = new YUKA.Time();
 
